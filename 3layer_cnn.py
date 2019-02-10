@@ -67,7 +67,7 @@ def load_data(train_file, validation_file, test_file):
         target_size=(150, 150),
         batch_size=32,
         class_mode='binary')
-    return train_generator, validation_generator
+    return train_generator, validation_generator, test_generator
 
 from keras.models import Sequential
 from keras.layers import Convolution2D, MaxPooling2D, Conv2D
@@ -106,23 +106,23 @@ def threelayers_cnn(train_generator, validation_generator, test_generator):
     model.fit_generator(
             train_generator,
             steps_per_epoch=2000,
-            epochs=10,
+            epochs=20,
             verbose=2,
             validation_data=validation_generator,
-            validation_steps=800)
+            validation_steps=2000)
 
-
-    score, acc = model.evaluate(test_generator)
+    score, acc = model.evaluate_generator(generator=test_generator, steps=2000)
+    # score, acc = model.evaluate(test_generator)
     print('Test score:', score)
     print('Test accuracy:', acc)
 
 
     # model.save_weights('first_try.h5')  # always save your weights after training or during training
-    model.save('100_model.h5')
+    model.save('20190210_2class_10000_2000_500_model.h5')
 
 
 if __name__=="__main__":
     # ImageDataGenerator_sample()
 
-    train_generator, validation_generator = load_data(train_file='./dataset/tra', validation_file='./dataset/val', test_file='./dataset/val')
-    threelayers_cnn(train_generator, validation_generator, validation_generator)
+    train_generator, validation_generator, test_generator = load_data(train_file='./dataset/train', validation_file='./dataset/validation', test_file='./dataset/test')
+    threelayers_cnn(train_generator, validation_generator, test_generator)
