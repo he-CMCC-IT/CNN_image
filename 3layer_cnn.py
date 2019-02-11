@@ -50,6 +50,8 @@ def load_data(train_file, validation_file, test_file):
     # this is a generator that will read pictures found in
     # subfolers of 'data/train', and indefinitely generate
     # batches of augmented image data
+
+    # 类别次序根据文件名称的字母顺序来排列
     train_generator = train_datagen.flow_from_directory(
         train_file,  # this is the target directory
         target_size=(150, 150),  # all images will be resized to 150x150

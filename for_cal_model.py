@@ -15,12 +15,16 @@ def test(filename):
                                        class_mode='binary')
 
     from keras.models import load_model
-    test_model = load_model('100_model.h5')
+    test_model = load_model('20190210_2class_10000_2000_500_model.h5')
 
 
     score, acc = test_model.evaluate(test_generator)
     print('Test score:', score)
     print('Test accuracy:', acc)
 
-    test_model.predict_classes(test_generator)
-    test_model.predict(test_generator)
+    print(test_model.predict_classes(test_generator))
+    print(test_model.predict(test_generator))
+
+
+if __name__=="__main__":
+    test('./dataset/test0')
