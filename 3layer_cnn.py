@@ -8,31 +8,35 @@ from keras.preprocessing.image import ImageDataGenerator, array_to_img, img_to_a
 
 def ImageDataGenerator_sample():
     datagen = ImageDataGenerator(
-        rotation_range=40,    # 随机图片角度0-180
+        rotation_range=10,    # 随机图片角度0-180
         width_shift_range=0.2,  # 随机水平移动0-1
         height_shift_range=0.2, # 随机竖直移动0-1
         shear_range=0.2,
         zoom_range=0.2,
-        horizontal_flip=True,
+        horizontal_flip=False,
         fill_mode='nearest')    # 需要时进行像素填充
 
-    img = load_img('dataset/train/cat.0.jpg')  # this is a PIL image
-    x = img_to_array(img)  # this is a Numpy array with shape (3, 150, 150)
+    image = load_img('/Users/zjxu/Documents/CMCC/workspace/CNN_image/dataset/train/01/1.png')  # this is a PIL image
+    # image = Image.open("./lena.jpg")
+    target = (800, 180)
+    image = image.resize(target)
+    # image = img_to_array(image)
+    x = img_to_array(image)  # this is a Numpy array with shape (3, 150, 150)
     x = x.reshape((1,) + x.shape)  # this is a Numpy array with shape (1, 3, 150, 150)
 
     # the .flow() command below generates batches of randomly transformed images
     # and saves the results to the `preview/` directory
     i = 0
     for batch in datagen.flow(x, batch_size=1,
-                              save_to_dir='preview', save_prefix='cat', save_format='jpeg'):
+                              save_to_dir='preview', save_prefix='acoss', save_format='jpeg'):
         i += 1
         if i > 20:
             break
-    train_generator = datagen.flow_from_directory(
-        "dataset/tra",  # this is the target directory
-        target_size=(150, 150),  # all images will be resized to 150x150
-        batch_size=32,
-        class_mode='binary')
+    # train_generator = datagen.flow_from_directory(
+    #     "dataset/tra",  # this is the target directory
+    #     target_size=(150, 150),  # all images will be resized to 150x150
+    #     batch_size=32,
+    #     class_mode='binary')
 
 def load_data(train_file, validation_file, test_file):
     print("load data...")
@@ -124,7 +128,7 @@ def threelayers_cnn(train_generator, validation_generator, test_generator):
 
 
 if __name__=="__main__":
-    # ImageDataGenerator_sample()
+    ImageDataGenerator_sample()
 
-    train_generator, validation_generator, test_generator = load_data(train_file='./dataset/train', validation_file='./dataset/validation', test_file='./dataset/test')
-    threelayers_cnn(train_generator, validation_generator, test_generator)
+    # train_generator, validation_generator, test_generator = load_data(train_file='./dataset/train', validation_file='./dataset/validation', test_file='./dataset/test')
+    # threelayers_cnn(train_generator, validation_generator, test_generator)

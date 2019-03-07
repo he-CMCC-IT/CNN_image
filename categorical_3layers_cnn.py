@@ -4,16 +4,18 @@ Created on 2019\1\23
 
 @author: ZJ_Xu
 '''
+pht_w = 800
+pht_h = 180
 from keras.preprocessing.image import ImageDataGenerator, array_to_img, img_to_array, load_img
 
 def ImageDataGenerator_sample():
     datagen = ImageDataGenerator(
-        rotation_range=40,    # 随机图片角度0-180
+        rotation_range=10,  # 随机图片角度0-180
         width_shift_range=0.2,  # 随机水平移动0-1
-        height_shift_range=0.2, # 随机竖直移动0-1
+        height_shift_range=0.2,  # 随机竖直移动0-1
         shear_range=0.2,
         zoom_range=0.2,
-        horizontal_flip=True,
+        horizontal_flip=False,
         fill_mode='nearest')    # 需要时进行像素填充
 
     img = load_img('dataset/train/cat.0.jpg')  # this is a PIL image
@@ -30,18 +32,22 @@ def ImageDataGenerator_sample():
             break
     train_generator = datagen.flow_from_directory(
         "dataset/tra",  # this is the target directory
-        target_size=(150, 150),  # all images will be resized to 150x150
-        batch_size=32,
+        target_size=(pht_w, pht_h),  # all images will be resized to 150x150
+        batch_size=1,
         class_mode='binary')
 
 def load_data(train_file, validation_file, test_file):
     print("load data...")
     # this is the augmentation configuration we will use for training
     train_datagen = ImageDataGenerator(
-        rescale=1. / 255,   # rescale值将在执行其他处理前乘到整个图像上，我们的图像在RGB通道都是0~255的整数，这样的操作可能使图像的值过高或过低，所以我们将这个值定为0~1之间的数。
-        shear_range=0.2,    # 剪切变换程度
+        rotation_range=10,  # 随机图片角度0-180
+        width_shift_range=0.2,  # 随机水平移动0-1
+        height_shift_range=0.2,  # 随机竖直移动0-1
+        shear_range=0.2,     # 剪切变换程度
         zoom_range=0.2,     # 随机放大
-        horizontal_flip=True)   # 水平翻转
+        horizontal_flip=False, # 水平翻转
+        fill_mode='nearest'
+        )
 
     # this is the augmentation configuration we will use for testing:
     # only rescaling
@@ -52,20 +58,21 @@ def load_data(train_file, validation_file, test_file):
     # batches of augmented image data
     train_generator = train_datagen.flow_from_directory(
         train_file,  # this is the target directory
-        target_size=(150, 150),  # all images will be resized to 150x150
-        batch_size=32,
+        target_size=(pht_w, pht_h),  # all images will be resized to 150x150
+        batch_size=1,
         class_mode='categorical')  # since we use binary_crossentropy loss, we need binary labels
+
 
     # this is a similar generator, for validation data
     validation_generator = test_datagen.flow_from_directory(
         validation_file,
-        target_size=(150, 150),
-        batch_size=32,
+        target_size=(pht_w, pht_h),
+        batch_size=1,
         class_mode='categorical')
     test_generator = test_datagen.flow_from_directory(
         test_file,
-        target_size=(150, 150),
-        batch_size=32,
+        target_size=(pht_w, pht_h),
+        batch_size=1,
         class_mode='categorical')
     return train_generator, validation_generator, test_generator
 
@@ -77,7 +84,7 @@ def threelayers_cnn(train_generator, validation_generator, test_generator):
 
     print('Build model...')
     model = Sequential()
-    model.add(Conv2D(32, (3, 3), input_shape=(150, 150, 3)))
+    model.add(Conv2D(32, (3, 3), input_shape=(pht_w, pht_h, 3)))
     model.add(Activation('relu'))
     model.add(MaxPooling2D(pool_size=(2, 2)))
 
@@ -93,10 +100,10 @@ def threelayers_cnn(train_generator, validation_generator, test_generator):
     model.add(Dense(64))
     model.add(Activation('relu'))
     # model.add(Dropout(0.5))
-    model.add(Dense(3))
+    model.add(Dense(2))
     model.add(Activation('softmax'))
 
-    model.compile(loss='sparse_categorical_crossentropy',
+    model.compile(loss='categorical_crossentropy',  #  categorical_crossentropy  &   sparse_categorical_crossentropy
                   optimizer='rmsprop',
                   metrics=['accuracy'])
 
@@ -106,7 +113,7 @@ def threelayers_cnn(train_generator, validation_generator, test_generator):
     model.fit_generator(
             train_generator,
             steps_per_epoch=2000,
-            epochs=2,
+            epochs=20,
             verbose=2,
             validation_data=validation_generator,
             validation_steps=2000)
@@ -118,11 +125,16 @@ def threelayers_cnn(train_generator, validation_generator, test_generator):
 
 
     # model.save_weights('first_try.h5')  # always save your weights after training or during training
-    model.save('100_model.h5')
+    model.save('eq_test2_model.h5')
 
 
 if __name__=="__main__":
     # ImageDataGenerator_sample()
 
-    train_generator, validation_generator, test_generator = load_data(train_file='./dataset/tra', validation_file='./dataset/val', test_file='./dataset/val')
+    # train_generator, validation_generator, test_generator = load_data(train_file='./dataset-CnD/tra', validation_file='./dataset-CnD/val', test_file='./dataset-CnD/val')
+
+    train_generator, validation_generator, test_generator = load_data(train_file='./dataset/train',
+                                                                      validation_file='./dataset/train',
+                                                                      test_file='./dataset/train')
+
     threelayers_cnn(train_generator, validation_generator, test_generator)
